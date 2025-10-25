@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: your-backend-app-name    # Azure App Serviceのアプリ名に変更
+  AZURE_WEBAPP_NAME: app-002-gen10-step3-1-py-oshima38 # Azure App Serviceのアプリ名に変更
   PYTHON_VERSION: '3.11'
 
 jobs:
