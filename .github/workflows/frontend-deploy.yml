@@ -10,8 +10,8 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: your-frontend-app-name    # Azure App Serviceのアプリ名に変更
-  NODE_VERSION: '18.x'
+  AZURE_WEBAPP_NAME: app-002-gen10-step3-1-node-oshima38
+  NODE_VERSION: '20.x'
 
 jobs:
   build-and-deploy:
@@ -25,13 +25,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
-
+          
       - name: Install dependencies
         run: |
           cd frontend
-          npm ci
+          npm install
 
       - name: Build application
         env:
@@ -40,15 +38,14 @@ jobs:
           cd frontend
           npm run build
 
-      - name: Run tests (optional)
+      - name: Create deployment package
         run: |
-          cd frontend
-          # npm test -- --passWithNoTests
+          cd frontend/build
+          zip -r ../../frontend-deploy.zip .
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_FRONTEND_PUBLISH_PROFILE }}
-          package: frontend/build
-
+          package: frontend-deploy.zip

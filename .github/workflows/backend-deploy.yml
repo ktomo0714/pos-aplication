@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: your-backend-app-name    # Azure App Serviceのアプリ名に変更
+  AZURE_WEBAPP_NAME: app-002-gen10-step3-1-py-oshima38 # Azure App Serviceのアプリ名に変更
   PYTHON_VERSION: '3.11'
 
 jobs:
@@ -56,42 +56,3 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE }}
           package: backend-deploy.zip
-
-      - name: Set environment variables on Azure
-        uses: azure/appservice-settings@v1
-        with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          app-settings-json: |
-            [
-              {
-                "name": "DB_HOST",
-                "value": "${{ secrets.DB_HOST }}",
-                "slotSetting": false
-              },
-              {
-                "name": "DB_DATABASE",
-                "value": "${{ secrets.DB_DATABASE }}",
-                "slotSetting": false
-              },
-              {
-                "name": "DB_USER",
-                "value": "${{ secrets.DB_USER }}",
-                "slotSetting": false
-              },
-              {
-                "name": "DB_PASSWORD",
-                "value": "${{ secrets.DB_PASSWORD }}",
-                "slotSetting": false
-              },
-              {
-                "name": "DB_PORT",
-                "value": "${{ secrets.DB_PORT }}",
-                "slotSetting": false
-              },
-              {
-                "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
-                "value": "true",
-                "slotSetting": false
-              }
-            ]
-
