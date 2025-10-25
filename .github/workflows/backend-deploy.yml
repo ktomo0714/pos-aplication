@@ -1,0 +1,97 @@
+name: Backend Deploy to Azure App Service
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-deploy.yml'
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: your-backend-app-name    # Azure App Serviceのアプリ名に変更
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Create and activate virtual environment
+        run: |
+          cd backend
+          python -m venv venv
+          source venv/bin/activate
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests (optional)
+        run: |
+          cd backend
+          source venv/bin/activate
+          # pytest tests/ の形でテストを実行可能
+
+      - name: Create deployment package
+        run: |
+          cd backend
+          zip -r ../backend-deploy.zip . -x "venv/*" -x "*.pyc" -x "__pycache__/*"
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE }}
+          package: backend-deploy.zip
+
+      - name: Set environment variables on Azure
+        uses: azure/appservice-settings@v1
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          app-settings-json: |
+            [
+              {
+                "name": "DB_HOST",
+                "value": "${{ secrets.DB_HOST }}",
+                "slotSetting": false
+              },
+              {
+                "name": "DB_DATABASE",
+                "value": "${{ secrets.DB_DATABASE }}",
+                "slotSetting": false
+              },
+              {
+                "name": "DB_USER",
+                "value": "${{ secrets.DB_USER }}",
+                "slotSetting": false
+              },
+              {
+                "name": "DB_PASSWORD",
+                "value": "${{ secrets.DB_PASSWORD }}",
+                "slotSetting": false
+              },
+              {
+                "name": "DB_PORT",
+                "value": "${{ secrets.DB_PORT }}",
+                "slotSetting": false
+              },
+              {
+                "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
+                "value": "true",
+                "slotSetting": false
+              }
+            ]
+
